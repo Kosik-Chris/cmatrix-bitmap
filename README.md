@@ -1,88 +1,66 @@
-# CMatrix
+# CMatrix-bitmap
 
-CMatrix is based on the screensaver from The Matrix website. It shows text
-flying in and out in a terminal like as seen in "The Matrix" movie. It can
-scroll lines all at the same rate or asynchronously and at a user-defined
-speed.
+CMatrix-bitmap is based Cmatrix program (see: https://github.com/abishekvashok/cmatrix).
+In lieu of fork clone and seperate program while under development (beleived out of scope of cmatrix?). 
+This can expand to a feature request/ merge with master branch *if* stable :P
 
-CMatrix by default operates in **eye candy** mode.  It must be aborted with
-control-c (Ctrl+C) or by pressing q.  If you wish for more of a screen saver
-effect, you must specify `-s` on the command line. For usage info, use `cmatrix -h`.
+## Goals
+Provide a bitmap, pixel-map with user defined characters (assume ascii for starters) that will overlay into the matrix
+rain effect and remain stationary. 
 
-[![Build Status](https://travis-ci.org/abishekvashok/cmatrix.svg?branch=master)](https://travis-ci.org/abishekvashok/cmatrix)
+Example: take a set size bitmap (say 20x20 square not filled in) and render it into a 100x100 sized terminal window. Ideal output-> stationary square built off user defined character with the rest of the terminal filling in the matrix effect around it.
 
-### Dependencies
-You'll probably need a decent ncurses library (or PDCurses on native Windows) to get this to work.
+Further steps:
+1. Configure for scaling
 
-### Building and installing cmatrix
-To install cmatrix, use either of the following methods from within the cmatrix directory.
+Ideas:
+treat each character in terminal as a literal character (0-255 val) and hard impose value in matrix slot
+32x10 window size (wxh), total matrix size = 320 bytes
+0 = normal cmatrix process
+1 = enfore specific character at slot\
 
-#### Using `configure` (recommended for most linux user)
-```
-autoreconf -i  # skip if using released tarball
-./configure
-make
-make install
-```
+32x10 window (bitwise control view) running normal
+cmatrix: 
 
-#### Using CMake
-Here we also show an out-of-source build in the sub directory "build".
-Don't use CMake if you want to use PDCurses, it won't work (for now).
-```
-mkdir -p build
-cd build
-# to install to "/usr/local"
-cmake ..
-# or to install to "/usr"
-#cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-make
-make install
-```
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
 
-### Running cmatrix
-After you have installed cmatrix just run `cmatrix` to run cmatrix :)
+32x10 window (bitwise control view) running cmatrix-bitmap
+enforced character slotting for drawing a square: 
+11111111111111111111111111111111
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+10000000000000000000000000000001
+11111111111111111111111111111111
 
-_To get the program to look most like the movie, use `cmatrix -lba`_
-_To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`_
+further explained concept: say user selects $ (cash moni) to be rendered character for bitmap square.
+let 0 = cmatrix fillin (0 is not the selected user character).
+Stationary dollar signs with matrix rain fill in:
 
-### Valuable information
-If you have any suggestions/flames/patches to send, please feel free to
-open issues and if possible solve them in PRs via Github.
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$000000000000000000000000000000$
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-_Note: cmatrix is probably not particularly portable or efficient, but it wont hog
-**too** much CPU time_
-
-### Captures
-
-#### Screenshots
-
-![Special Font & bold](data/img/capture_bold_font.png?raw=true "cmatrix -bx")
-
-#### Screencasts
-
-![Movie-Like Cast](data/img/capture_orig.gif?raw=true "cmatrix -xba")
-
-### Maintainers
-- Abishek V Ashok (@abishekvashok) <abishekvashok@gmail.com> [Core]
-
-### Thanks to:
-- Chris Allegretta <chrisa@asty.org> for writing cmatrix up in a fornight and giving us
-  the responsibility to further improve it.
-- Krisjon Hanson and Bjoern Ganslandt for helping with bold support and 
-  Bjoern again for the cursor removal code, helping with the `-u` and `-l`
-  modes/flags, and Makefile improvements.
-- Adam Gurno for multi-color support.
-- Garrick West for debian consolefont dir support.
-- Nemo for design thoughts and continuous help and support.
-- John Donahue for helping with transparent term support
-- Ben Esacove for Redhat 6 compatibility w/matrix.psf.gz
-- jwz for the xmatrix module to xscreensaver at http://www.jwz.org/xscreensaver.
-- Chris Allegretta's girlfriend Amy for not killing him when he stayed up till 3 AM
-  writing code.
-- The makers of the Matrix for one kickass movie!
-- Everyone who has sent (and who will send) us and Chris mails regarding
-  bugs, comments, patches or just a hello.
-- Everyone who has opened issues and PRs on the github repository.
 
 ### License
 This software is provided under the GNU GPL v3.
