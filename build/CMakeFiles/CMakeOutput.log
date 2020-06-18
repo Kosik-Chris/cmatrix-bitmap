@@ -25,3 +25,29 @@ Compilation of the C compiler identification source "CMakeCCompilerId.c" produce
 
 The C compiler identification is GNU, found in "/home/kyt/Desktop/programs/cmatrix-bitmap/build/CMakeFiles/3.10.2/CompilerIdC/a.out"
 
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/avr-gcc-5.4.0 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/kyt/Desktop/programs/cmatrix-bitmap/build/CMakeFiles/3.10.2/CompilerIdC/a.out"
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/avr-gcc-5.4.0 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/kyt/Desktop/programs/cmatrix-bitmap/build/CMakeFiles/3.10.2/CompilerIdC/a.out"
+

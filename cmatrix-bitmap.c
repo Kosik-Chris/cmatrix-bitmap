@@ -154,11 +154,6 @@ void processFile(const char * filename){
       //seek to desired post-png header
       fseek(pngFile,8, SEEK_SET);
 
-      //messing around making sox play audio
-      // char cmd[50];
-      // strcpy(cmd,"play $HOME/Desktop/untitled.mp3");
-      // system(cmd);
-
       /*
           Source: http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html
 
@@ -186,11 +181,17 @@ void processFile(const char * filename){
           type code and chunk data fields, but not including the length field. The CRC is always present, even for 
           chunks containing no data. See CRC algorithm.
       */
+
+     /*
+        Approach: Read the data length of the chunk, seek ahead and check the chunk type, will only care about the IDAT chunk and looking for specific
+        binary value indicators with respect to the dimensions of the image (obtained from IHDR chunk).
+
+     */
       
       //read 4 bytes to figure out length of data
       //int guaranteed to be at least 32 bit, int = ok
       fread(chunkFieldBuffer,4,1,pngFile);
-      int chunkLength = chunkFieldBuffer[3]+chunkFieldBuffer[2]*8+chunkFieldBuffer[1]*16+chunkFieldBuffer[0]*24;
+      int chunkLength = chunkFieldBuffer[3]+chunkFieldBuffer[2]*256+chunkFieldBuffer[1]*(256*2)+chunkFieldBuffer[0]*(256*3);
       
       //Obtain IHDR chunk
       Chunk * IHDR_CHUNK = malloc(sizeof(Chunk)*1); //allocate a new chunk for critical IHDR chunk ptr
@@ -207,41 +208,125 @@ void processFile(const char * filename){
       */
       //IHDR_CHUNK->length = malloc(sizeof(char)*4); //32 bit length 
       IHDR_CHUNK->length = chunkLength;
-      IHDR_CHUNK->type = malloc(sizeof(char)*4); //32 bit type code (checking bits to determine types)
-      IHDR_CHUNK->data = malloc(sizeof(char)*chunkLength); //we know how much memory to allocate from the chunks 4 byte length chunk
-      IHDR_CHUNK->crc = malloc(sizeof(char)*4); //32 bit crc
-
+      IHDR_CHUNK->type = malloc(sizeof(char)*5); //32 bit type code (checking bits to determine types)
+      IHDR_CHUNK->data = malloc(sizeof(char)*chunkLength+1); //we know how much memory to allocate from the chunks 4 byte length chunk
+      IHDR_CHUNK->crc = malloc(sizeof(char)*5); //32 bit crc
       
-      printf("chunk length: %d\n", IHDR_CHUNK->length);
+      printf("IHDR chunk length: %d\n", IHDR_CHUNK->length);
       //read next 4 bytes to get chunk type
       fread(chunkFieldBuffer,4,1,pngFile);
-      strncpy(IHDR_CHUNK->type, chunkFieldBuffer, 4); 
+      strncpy(IHDR_CHUNK->type, chunkFieldBuffer+'\0', 5); 
       printf("chunk type: %s\n",IHDR_CHUNK->type);
 
       char dataBuffer[chunkLength];
       fread(dataBuffer,chunkLength,1, pngFile);
-      strncpy(IHDR_CHUNK->data, dataBuffer, chunkLength);
-      printf("chunk data: %s\n", IHDR_CHUNK->data);
+      printf("image width : %d pixels.\n", dataBuffer[3]+dataBuffer[2]*256+dataBuffer[1]*(256*2)*dataBuffer[0]*(256*3));
+      printf("image height : %d pixels.\n", dataBuffer[7]+dataBuffer[6]*256+dataBuffer[5]*(256*2)*dataBuffer[4]*(256*3));
+      printf("bit depth: %d\n", dataBuffer[8]);
+      printf("color type: %d\n", dataBuffer[9]);
+      printf("compression method: %d\n", dataBuffer[10]);
+      printf("filter method: %d\n", dataBuffer[11]);
+      printf("interlace method: %d\n", dataBuffer[12]);
+      strncpy(IHDR_CHUNK->data, dataBuffer+'\0', chunkLength+1);
 
       //read the crc field
       fread(chunkFieldBuffer,4,1,pngFile);
-      strncpy(IHDR_CHUNK->crc,chunkFieldBuffer,4);
-      printf("Chunk crc: %s\n", IHDR_CHUNK->crc);
+      strncpy(IHDR_CHUNK->crc,chunkFieldBuffer+'\0',5);
+      printf("IHDR Chunk crc: %s\n", IHDR_CHUNK->crc);
 
-      //Read 4 bytes at a time until EOF
+      /*
+        Begin next chunk, PLTE or IDAT
+      */
+     //get the legnth of chunk
+     fread(chunkFieldBuffer,4,1,pngFile);
+     chunkLength = chunkFieldBuffer[3]+chunkFieldBuffer[2]*256+chunkFieldBuffer[1]*(256*2)+chunkFieldBuffer[0]*(256*3);
+     printf("Decimal byte values buff 3: %d buff2: %d buff1: %d buff0: %d\n", chunkFieldBuffer[3], chunkFieldBuffer[2], chunkFieldBuffer[1], chunkFieldBuffer[0]);
+
+     //load chunk into heap, testing so we "know" what types beforehand
+     Chunk * IDAT_CHUNK = malloc(sizeof(Chunk)*1); //allocate a new chunk for critical IHDR chunk ptr
+     IDAT_CHUNK->length = chunkLength;
+     IDAT_CHUNK->type = malloc(sizeof(char)*5); //32 bit type code (checking bits to determine types)
+     IDAT_CHUNK->data = malloc(sizeof(char)*chunkLength+1); //we know how much memory to allocate from the chunks 4 byte length chunk
+     IDAT_CHUNK->crc = malloc(sizeof(char)*5); //32 bit crc
+     printf("IDAT chunk length: %d\n", IDAT_CHUNK->length);
+
+     //read next 4 bytes to get chunk type
+      fread(chunkFieldBuffer,4,1,pngFile);
+      strncpy(IDAT_CHUNK->type, chunkFieldBuffer+'\0', 5); 
+      printf("IDAT chunk type: %s\n",IDAT_CHUNK->type);
+
+      char idatBuffer[chunkLength];
+      fread(idatBuffer,chunkLength,1, pngFile);
+      strncpy(IDAT_CHUNK->data, idatBuffer+'\0', chunkLength+1);
+      printf("IDAT chunk data: %s\n", IDAT_CHUNK->data);
+
+
+      //TODO: Figure out how to identify regions that are colored/contain
+      //values we want to annotate onto cmatrix
+
+      //looking through zlib compression.
+
+
+
+      //read the crc field
+      fread(chunkFieldBuffer,4,1,pngFile);
+      strncpy(IDAT_CHUNK->crc,chunkFieldBuffer+'\0',5);
+      printf("IDAT Chunk crc: %s\n", IDAT_CHUNK->crc);
+
+      /*
+        Begin next chunk, IEND for testIMG 32x10_square.png
+        data field should == 0
+      */
+      //get the legnth of chunk
+     fread(chunkFieldBuffer,4,1,pngFile);
+     chunkLength = chunkFieldBuffer[3]+chunkFieldBuffer[2]*256+chunkFieldBuffer[1]*(256*2)+chunkFieldBuffer[0]*(256*3);
+     Chunk * IEND_CHUNK = malloc(sizeof(Chunk)*1); //allocate a new chunk for critical IHDR chunk ptr
+     IEND_CHUNK->length = chunkLength;
+     IEND_CHUNK->type = malloc(sizeof(char)*5); //32 bit type code (checking bits to determine types)
+     IEND_CHUNK->data = malloc(sizeof(char)*chunkLength+1); //we know how much memory to allocate from the chunks 4 byte length chunk
+     IEND_CHUNK->crc = malloc(sizeof(char)*5); //32 bit crc
+     printf("IEND chunk length: %d\n", IEND_CHUNK->length);
+
+      //read next 4 bytes to get chunk type
+      fread(chunkFieldBuffer,4,1,pngFile);
+      strncpy(IEND_CHUNK->type, chunkFieldBuffer+'\0', 5); 
+      printf("IEND chunk type: %s\n",IEND_CHUNK->type);
+
+      //would get chunk data here but should be == 0
+      // char iendBuffer[chunkLength];
+      // fread(iendBuffer,chunkLength,1, pngFile);
+      // strncpy(IEND_CHUNK->data, iendBuffer+'\0', chunkLength+1);
+      // printf("IEND chunk data: %s\n", IEND_CHUNK->data);
+
+      //read the crc field
+      fread(chunkFieldBuffer,4,1,pngFile);
+      strncpy(IEND_CHUNK->crc,chunkFieldBuffer+'\0',5);
+      printf("IEND Chunk crc: %s\n", IEND_CHUNK->crc);
+
+
+
+      //Read 1 bytes at a time until EOF
+      //these are extra bytes, after IEND crc we are done. 
       while(fread(byteBuffer,1,1,pngFile)){
-          //printf("Chunk Buffer: %x \n", byteBuffer[0] & 0xff);
+          printf("Chunk Buffer: %x \n", byteBuffer[0] & 0xff);
           numBytes++;
       }
-      printf("Number Byte: %d\n", numBytes);
+      printf("Number Byte remaining in file: %d\n", numBytes);
 
       fclose(pngFile); //close the file
       //free allocated memory
       free(IHDR_CHUNK->crc);
       free(IHDR_CHUNK->data);
       free(IHDR_CHUNK->type);
-      //free(IHDR_CHUNK->length);
       free(IHDR_CHUNK);
+      free(IDAT_CHUNK->crc);
+      free(IDAT_CHUNK->data);
+      free(IDAT_CHUNK->type);
+      free(IDAT_CHUNK);
+      free(IEND_CHUNK->crc);
+      free(IEND_CHUNK->data);
+      free(IEND_CHUNK->type);
+      free(IEND_CHUNK);
 
     }
 

@@ -22,3 +22,27 @@ avr-gcc-5.4.0: error: unrecognized command line option ‘-rdynamic’
 ninja: build stopped: subcommand failed.
 
 
+Determining if the C compiler works failed with the following output:
+Change Dir: /home/kyt/Desktop/programs/cmatrix-bitmap/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/ninja" "cmTC_992d4"
+[1/2] Building C object CMakeFiles/cmTC_992d4.dir/testCCompiler.c.o
+[2/2] Linking C executable cmTC_992d4
+FAILED: cmTC_992d4 
+: && /usr/bin/avr-gcc-5.4.0   -rdynamic CMakeFiles/cmTC_992d4.dir/testCCompiler.c.o  -o cmTC_992d4   && :
+avr-gcc-5.4.0: error: unrecognized command line option ‘-rdynamic’
+ninja: build stopped: subcommand failed.
+
+
+Determining if the C compiler works failed with the following output:
+Change Dir: /home/kyt/Desktop/programs/cmatrix-bitmap/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/ninja" "cmTC_e3f18"
+[1/2] Building C object CMakeFiles/cmTC_e3f18.dir/testCCompiler.c.o
+[2/2] Linking C executable cmTC_e3f18
+FAILED: cmTC_e3f18 
+: && /usr/bin/avr-gcc-5.4.0   -rdynamic CMakeFiles/cmTC_e3f18.dir/testCCompiler.c.o  -o cmTC_e3f18   && :
+avr-gcc-5.4.0: error: unrecognized command line option ‘-rdynamic’
+ninja: build stopped: subcommand failed.
+
+
