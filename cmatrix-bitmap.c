@@ -264,7 +264,7 @@ void processFile(const char * filename){
       //TODO: Figure out how to identify regions that are colored/contain
       //values we want to annotate onto cmatrix
 
-      //looking through zlib compression.
+      //looking through zlib compression. edit..
 
 
 
